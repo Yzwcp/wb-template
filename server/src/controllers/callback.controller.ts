@@ -5,7 +5,8 @@ import {
   processPayCallback,
   processRefundCallback,
 } from "../jobs/process-callback";
-import logger from "../utils/logger";
+import logger, { traceStorage } from "../utils/logger";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * 统一回调入口 — 支付/退款通知
@@ -76,6 +77,7 @@ export async function notify(req: Request, res: Response): Promise<void> {
   }
 
   // 构建业务数据
+  const cbTraceId = req.traceId || 'cb-' + uuidv4().replace(/-/g, '').slice(0, 7);
   let jobName: string;
   let jobData: any;
 
@@ -83,6 +85,7 @@ export async function notify(req: Request, res: Response): Promise<void> {
     const info = parsed.req_info || {};
     jobName = "refund-callback";
     jobData = {
+      traceId: cbTraceId,
       type: "refund",
       data: {
         outRefundNo: info.out_refund_no || "",
@@ -92,6 +95,7 @@ export async function notify(req: Request, res: Response): Promise<void> {
   } else {
     jobName = "pay-callback";
     jobData = {
+      traceId: cbTraceId,
       type: "payment",
       data: {
         outTradeNo: parsed.out_trade_no,
@@ -117,8 +121,10 @@ export async function notify(req: Request, res: Response): Promise<void> {
     );
     // 不 await 直接处理，避免超时
     const processFn = isRefund ? processRefundCallback : processPayCallback;
-    processFn(jobData.data).catch((procErr: any) => {
-      logger.error(`[Callback] 降级处理失败: ${procErr.message}`);
+    traceStorage.run({ traceId: cbTraceId }, () => {
+      processFn(jobData.data).catch((procErr: any) => {
+        logger.error(`[Callback] 降级处理失败: ${procErr.message}`);
+      });
     });
   }
 

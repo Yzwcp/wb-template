@@ -1,7 +1,8 @@
-import Menu from '../models/Menu';
+﻿import Menu from '../models/Menu';
 import RoleMenu from '../models/RoleMenu';
 import { BusinessError } from '../utils/response';
 import { Op } from 'sequelize';
+import { Cacheable, CacheEvict } from '../cache';
 
 interface MenuTreeNode {
   id: number;
@@ -20,6 +21,7 @@ interface MenuTreeNode {
 
 class MenuService {
   /** 获取菜单树 */
+  @Cacheable({ key: 'menu:tree', ttl: 600 })
   async getTree() {
     const menus = await Menu.findAll({
       order: [['sort', 'ASC']],
@@ -29,6 +31,7 @@ class MenuService {
   }
 
   /** 根据ID获取菜单 */
+  @Cacheable({ key: (id: number) => 'menu:' + id, ttl: 600 })
   async getById(id: number) {
     const menu = await Menu.findByPk(id);
     if (!menu) {
@@ -38,6 +41,7 @@ class MenuService {
   }
 
   /** 创建菜单 */
+  @CacheEvict({ keys: ['menu:tree'] })
   async create(data: {
     parentId?: number;
     name: string;
@@ -67,6 +71,7 @@ class MenuService {
   }
 
   /** 更新菜单 */
+  @CacheEvict({ keys: [(id: number) => 'menu:' + id, 'menu:tree'] })
   async update(id: number, data: {
     parentId?: number;
     name?: string;
@@ -89,22 +94,19 @@ class MenuService {
   }
 
   /** 删除菜单（有子菜单时不允许删除） */
+  @CacheEvict({ keys: [(id: number) => 'menu:' + id, 'menu:tree'] })
   async remove(id: number) {
     const menu = await Menu.findByPk(id);
     if (!menu) {
       throw new BusinessError(400, '菜单不存在');
     }
 
-    // 检查是否有子菜单
     const children = await Menu.findAll({ where: { parentId: id } });
     if (children.length > 0) {
       throw new BusinessError(400, '存在子菜单，无法删除');
     }
 
-    // 删除角色菜单关联
     await RoleMenu.destroy({ where: { menuId: id } });
-
-    // 删除菜单
     await menu.destroy();
   }
 

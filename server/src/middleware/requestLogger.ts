@@ -27,8 +27,11 @@ export function accessLogger(
       const duration = Date.now() - start;
       const level = duration > 1000 ? "warn" : "info";
 
+      const mod = (req.originalUrl.split("/")[2] || "").slice(0, 24);
+
       logger.log(level, `${req.method} ${req.originalUrl} ${res.statusCode}`, {
         slow: duration > 1000,
+        module: mod,
         method: req.method,
         url: req.originalUrl,
         status: res.statusCode,
@@ -39,7 +42,7 @@ export function accessLogger(
         contentLength: res.get("content-length"),
         reqBody: req.path.startsWith('/api/callback')
           ? '[XML callback body, see [Callback] log]'
-          : safeBody(req.body),
+          : req.method !== 'GET' ? safeBody(req.body) : undefined,
         resBody: res.statusCode >= 400 ? safeBody(responseBody) : undefined,
       });
     });

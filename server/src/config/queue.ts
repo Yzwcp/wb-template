@@ -1,6 +1,7 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Queue, Worker } from 'bullmq';
 import { config } from './index';
-import logger from '../utils/logger';
+import logger, { traceStorage } from '../utils/logger';
 
 const connection = {
   host: config.redis.host,
@@ -25,22 +26,31 @@ export function startCallbackWorker() {
   const worker = new Worker(
     'wechat-callback',
     async (job) => {
-      const { type, data } = job.data;
-      const { processPayCallback, processRefundCallback } = await import('../jobs/process-callback');
-      if (type === 'payment') {
-        await processPayCallback(data);
-      } else if (type === 'refund') {
-        await processRefundCallback(data);
-      }
+      const tid = job.data.traceId || 'cb-' + uuidv4().replace(/-/g, '').slice(0, 7);
+      await traceStorage.run({ traceId: tid }, async () => {
+        const { type, data } = job.data;
+        const { processPayCallback, processRefundCallback } = await import('../jobs/process-callback');
+        if (type === 'payment') {
+          await processPayCallback(data);
+        } else if (type === 'refund') {
+          await processRefundCallback(data);
+        }
+      });
     },
     { connection, prefix: config.redis.keyPrefix, concurrency: 5 },
   );
 
   worker.on('completed', (job) => {
+    const tid = job.data.traceId || 'cb-' + uuidv4().replace(/-/g, '').slice(0, 7);
+    traceStorage.run({ traceId: tid }, () => {
       logger.info(`[Callback] Job ${job.id} completed: ${job.data.type}`);
+    });
   });
   worker.on('failed', (job, err) => {
+    const tid = job?.data?.traceId || 'cb-' + uuidv4().replace(/-/g, '').slice(0, 7);
+    traceStorage.run({ traceId: tid }, () => {
       logger.error(`[Callback] Job ${job?.id} failed`, { error: err?.message });
+    });
   });
 
   return worker;
