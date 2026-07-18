@@ -37,7 +37,9 @@ export function accessLogger(
         userAgent: req.get("user-agent")?.slice(0, 100),
         userId: req.user?.userId,
         contentLength: res.get("content-length"),
-        reqBody: safeBody(req.body),
+        reqBody: req.path.startsWith('/api/callback')
+          ? '[XML callback body, see [Callback] log]'
+          : safeBody(req.body),
         resBody: res.statusCode >= 400 ? safeBody(responseBody) : undefined,
       });
     });
@@ -91,6 +93,10 @@ export function operationLogger(
 
 function safeBody(body: any): any {
   if (!body) return body;
+  // 字符串（如微信回调 XML）过长时截断
+  if (typeof body === 'string') {
+    return body.length > 500 ? body.slice(0, 500) + '...(truncated)' : body;
+  }
   const safe = { ...body };
   if (safe.password) safe.password = "***";
   if (safe.newPassword) safe.newPassword = "***";
@@ -98,3 +104,4 @@ function safeBody(body: any): any {
   if (safe.refreshToken) safe.refreshToken = "***";
   return safe;
 }
+

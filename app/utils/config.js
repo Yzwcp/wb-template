@@ -1,7 +1,7 @@
 //api接口
 // export const baseUrl = 'https://form.win.shengdajia.cn/api'
-// export const baseUrl = "http://10.53.1.25:9003";
-export const baseUrl = "https://nyq.win.shengdajia.cn";
+export const baseUrl = "http://localhost:3000";
+// export const baseUrl = "https://nyq.win.shengdajia.cn";
 
 export const imageUrl = "https://tbwork.shengdajia.cn/public";
 // export const requestType = 'client'

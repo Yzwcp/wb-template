@@ -105,7 +105,7 @@ async function handlePay() {
       timeStamp: res.payParams.timeStamp,
       nonceStr: res.payParams.nonceStr,
       package: res.payParams.package,
-      signType: "RSA",
+      signType: res.payParams.signType || 'MD5',
       paySign: res.payParams.paySign,
     });
 
@@ -211,3 +211,5 @@ async function handlePay() {
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
 }
 </style>
+
+
