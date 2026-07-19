@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+﻿import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { staticRoutes } from './routes'
 import { generateRoutes } from './dynamic'
 import { useUserStore } from '@/stores/user'
@@ -28,14 +28,17 @@ router.beforeEach(async (to, _from, next) => {
       return
     }
 
-    // 菜单未加载 → 先获取用户信息和菜单，动态添加路由
-    if (!userStore.menusLoaded && !hasAddedRoutes) {
+    // 动态路由还未注册 → 执行注册和字典加载
+    if (!hasAddedRoutes) {
       try {
-        await userStore.fetchUserInfo()
+        // 如果菜单还没加载过（页面刷新场景），先拉取
+        if (!userStore.menusLoaded) {
+          await userStore.fetchUserInfo()
+        }
 
         // 加载所有字典（失败不阻塞登录）
         const dictStore = useDictStore()
-        try { await dictStore.loadAll() } catch { /* 字典加载失败，页面用原始值兜底 */ }
+        try { await dictStore.loadAll() } catch { /* 字典加载失败 */ }
 
         const dynamicRoutes = generateRoutes(userStore.menus)
         for (const route of dynamicRoutes) {

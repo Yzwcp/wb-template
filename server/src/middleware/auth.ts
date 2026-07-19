@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken, JwtPayload } from "../utils/jwt";
 import User from "../models/User";
-import { redis } from "../config/redis";
+import { redis } from "../cache";
 
 // 扩展 Express Request
 declare global {
@@ -37,11 +37,18 @@ export async function auth(
     const cached = await redis.get(cacheKey);
     let permissions: string[] = [];
     let roles: string[] = [];
+    let userStatus: string | null = null;
 
     if (cached) {
       const parsed = JSON.parse(cached);
       permissions = parsed.permissions || [];
       roles = parsed.roles || [];
+      userStatus = parsed.status || null;
+      // 缓存命中也检查用户是否被禁用
+      if (userStatus === "2") {
+        res.status(401).json({ code: 401, data: null, message: "用户已被禁用" });
+        return;
+      }
     } else {
       // 从数据库加载并按角色缓存
       const user = await User.findByPk(payload.userId, {
@@ -61,6 +68,7 @@ export async function auth(
       }
 
       const roleList = user.roles || [];
+      userStatus = user.status;
       roles = roleList.map((r) => r.code);
 
       const menuPerms: string[] = [];
@@ -75,8 +83,8 @@ export async function auth(
       });
       permissions = [...new Set([...menuPerms, ...directPerms])];
 
-      // 缓存 30 分钟
-      await redis.setex(cacheKey, 1800, JSON.stringify({ permissions, roles }));
+      // 缓存 30 分钟，包含 status 以便缓存命中时检查
+      await redis.setex(cacheKey, 1800, JSON.stringify({ permissions, roles, status: user.status }));
     }
 
     req.user = { ...payload, permissions, roles };

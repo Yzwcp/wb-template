@@ -1,10 +1,10 @@
-import User from "../models/User";
+﻿import User from "../models/User";
 import Role from "../models/Role";
 import UserRole from "../models/UserRole";
 import { hashPassword } from "../utils/password";
 import { BusinessError } from "../utils/response";
 import { Op } from "sequelize";
-import { redis } from "../config/redis";
+import { redis } from "../cache";
 
 interface UserListParams {
   page: number;
@@ -21,9 +21,9 @@ class UserService {
     const where: any = {};
     if (keyword) {
       where[Op.or] = [
-        { username: { [Op.like]: `%${keyword}%` } },
-        { nickname: { [Op.like]: `%${keyword}%` } },
-        { email: { [Op.like]: `%${keyword}%` } },
+        { username: { [Op.like]: "%" + keyword + "%" } },
+        { nickname: { [Op.like]: "%" + keyword + "%" } },
+        { email: { [Op.like]: "%" + keyword + "%" } },
       ];
     }
     if (status !== undefined && status !== null) {
@@ -77,7 +77,6 @@ class UserService {
     status?: number;
     platform?: string;
   }) {
-    // 检查用户名是否已存在
     const exist = await User.findOne({ where: { username: data.username } });
     if (exist) {
       throw new BusinessError(400, "用户已存在");
@@ -109,11 +108,11 @@ class UserService {
       throw new BusinessError(400, "用户不存在");
     }
 
-    // 不允许修改用户名
     await user.update(data);
 
-    // 清除权限缓存
+    // 清除缓存
     await redis.del(`user:perm:${id}`);
+    await redis.del(`user:info:${id}`);
 
     return user;
   }
@@ -125,12 +124,11 @@ class UserService {
       throw new BusinessError(400, "用户不存在");
     }
 
-    // 删除用户角色关联
     await UserRole.destroy({ where: { userId: id } });
-    // 删除用户
     await user.destroy();
     // 清除缓存
     await redis.del(`user:perm:${id}`);
+    await redis.del(`user:info:${id}`);
     await redis.del(`refresh_token:${id}`);
   }
 
@@ -146,6 +144,7 @@ class UserService {
     if (status === "2") {
       // 禁用时清除 token 和缓存
       await redis.del(`user:perm:${id}`);
+      await redis.del(`user:info:${id}`);
       await redis.del(`refresh_token:${id}`);
     }
 
@@ -159,20 +158,18 @@ class UserService {
       throw new BusinessError(400, "用户不存在");
     }
 
-    // 使用事务
     const { sequelize } = require("../config/database");
     await sequelize.transaction(async (t: any) => {
-      // 删除原有角色关联
       await UserRole.destroy({ where: { userId }, transaction: t });
-      // 批量创建新角色关联
       if (roleIds && roleIds.length > 0) {
         const records = roleIds.map((roleId) => ({ userId, roleId }));
         await UserRole.bulkCreate(records, { transaction: t });
       }
     });
 
-    // 清除权限缓存
+    // 清除缓存
     await redis.del(`user:perm:${userId}`);
+    await redis.del(`user:info:${userId}`);
 
     return { userId, roleIds };
   }

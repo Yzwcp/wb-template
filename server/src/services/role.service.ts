@@ -1,15 +1,15 @@
-import Role from '../models/Role';
-import RoleMenu from '../models/RoleMenu';
-import { BusinessError } from '../utils/response';
-import { redis } from '../config/redis';
+﻿import Role from "../models/Role";
+import RoleMenu from "../models/RoleMenu";
+import { BusinessError } from "../utils/response";
+import { redis } from "../cache";
 
 class RoleService {
   /** 获取角色列表（分页） */
   async getList(params?: { keyword?: string; status?: number; page?: number; pageSize?: number }) {
     const where: any = {};
-    const { Op } = require('sequelize');
+    const { Op } = require("sequelize");
     if (params?.keyword) {
-      where.name = { [Op.like]: `%${params.keyword}%` };
+      where.name = { [Op.like]: "%" + params.keyword + "%" };
     }
     if (params?.status !== undefined && params?.status !== null) {
       where.status = params.status;
@@ -20,7 +20,7 @@ class RoleService {
 
     const { rows, count } = await Role.findAndCountAll({
       where,
-      order: [['sort', 'ASC']],
+      order: [["sort", "ASC"]],
       limit: pageSize,
       offset: (page - 1) * pageSize,
     });
@@ -32,8 +32,8 @@ class RoleService {
   async getAll() {
     const roles = await Role.findAll({
       where: { status: 1 },
-      order: [['sort', 'ASC']],
-      attributes: ['id', 'name', 'code'],
+      order: [["sort", "ASC"]],
+      attributes: ["id", "name", "code"],
     });
     return roles;
   }
@@ -42,12 +42,12 @@ class RoleService {
   async getById(id: number) {
     const role = await Role.findByPk(id, {
       include: [
-        { association: 'menus', attributes: ['id'], through: { attributes: [] } },
-        { association: 'permissions', attributes: ['id', 'code'], through: { attributes: [] } },
+        { association: "menus", attributes: ["id"], through: { attributes: [] } },
+        { association: "permissions", attributes: ["id", "code"], through: { attributes: [] } },
       ],
     });
     if (!role) {
-      throw new BusinessError(400, '角色不存在');
+      throw new BusinessError(400, "角色不存在");
     }
     return role;
   }
@@ -62,7 +62,7 @@ class RoleService {
   }) {
     const exist = await Role.findOne({ where: { code: data.code } });
     if (exist) {
-      throw new BusinessError(400, '角色编码已存在');
+      throw new BusinessError(400, "角色编码已存在");
     }
 
     const role = await Role.create({
@@ -83,12 +83,12 @@ class RoleService {
   }) {
     const role = await Role.findByPk(id);
     if (!role) {
-      throw new BusinessError(400, '角色不存在');
+      throw new BusinessError(400, "角色不存在");
     }
 
     await role.update(data);
 
-    // 清除所有使用该角色的用户权限缓存
+    // 清除所有使用该角色的用户权限和用户信息缓存
     await this.clearRoleUserCache(id);
 
     return role;
@@ -98,15 +98,13 @@ class RoleService {
   async remove(id: number) {
     const role = await Role.findByPk(id);
     if (!role) {
-      throw new BusinessError(400, '角色不存在');
+      throw new BusinessError(400, "角色不存在");
     }
 
-    // 删除关联
     await RoleMenu.destroy({ where: { roleId: id } });
-    const RolePermission = require('../models/RolePermission').default;
+    const RolePermission = require("../models/RolePermission").default;
     await RolePermission.destroy({ where: { roleId: id } });
 
-    // 删除角色
     await role.destroy();
 
     // 清除缓存
@@ -117,31 +115,33 @@ class RoleService {
   async assignMenus(roleId: number, menuIds: number[]) {
     const role = await Role.findByPk(roleId);
     if (!role) {
-      throw new BusinessError(400, '角色不存在');
+      throw new BusinessError(400, "角色不存在");
     }
 
-    const { sequelize } = require('../config/database');
+    const { sequelize } = require("../config/database");
     await sequelize.transaction(async (t: any) => {
-      // 删除原有角色菜单关联
       await RoleMenu.destroy({ where: { roleId }, transaction: t });
-      // 批量创建新关联
       if (menuIds && menuIds.length > 0) {
-        const records = menuIds.map(menuId => ({ roleId, menuId }));
+        const records = menuIds.map((menuId) => ({ roleId, menuId }));
         await RoleMenu.bulkCreate(records, { transaction: t });
       }
     });
 
-    // 清除所有使用该角色的用户权限缓存
+    // 清除所有使用该角色的用户权限和用户信息缓存
     await this.clearRoleUserCache(roleId);
 
     return { roleId, menuIds };
   }
 
-  /** 清除角色的用户权限缓存 */
+  /** 清除角色的用户缓存（user:perm + user:info） */
   private async clearRoleUserCache(roleId: number) {
-    const UserRole = require('../models/UserRole').default;
+    const UserRole = require("../models/UserRole").default;
     const userRoles = await UserRole.findAll({ where: { roleId } });
-    const deletePromises = userRoles.map((ur: any) => redis.del(`user:perm:${ur.userId}`));
+    const deletePromises: Promise<any>[] = [];
+    for (const ur of userRoles) {
+      deletePromises.push(redis.del("user:perm:" + (ur as any).userId));
+      deletePromises.push(redis.del("user:info:" + (ur as any).userId));
+    }
     await Promise.all(deletePromises);
   }
 }

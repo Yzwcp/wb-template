@@ -21,6 +21,8 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = res.userInfo
     setToken(res.token)
     setRefreshToken(res.refreshToken)
+    // 登录后立即拉取完整信息（菜单+权限），确保路由跳转前数据就绪
+    await fetchUserInfo()
   }
 
   /** 获取用户信息 */
