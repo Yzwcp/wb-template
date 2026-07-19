@@ -75,7 +75,7 @@ class PermissionService {
   }
 
   /**
-   * 清除拥有指定权限的所有用户的 user:perm + user:info 缓存。
+   * 清除拥有指定权限的所有用户的 user:perm 缓存。
    * 查询链路：permissionId → roleIds → userIds → 删除缓存
    */
   private async clearPermissionUserCache(permissionId: number) {
@@ -96,7 +96,6 @@ class PermissionService {
     const promises: Promise<any>[] = [];
     for (const uid of userIds) {
       promises.push(redis.del("user:perm:" + uid));
-      promises.push(redis.del("user:info:" + uid));
     }
     await Promise.all(promises);
   }

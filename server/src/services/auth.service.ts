@@ -5,7 +5,7 @@ import Permission from "../models/Permission";
 import LoginLog from "../models/LoginLog";
 import { comparePassword } from "../utils/password";
 import { signAccessToken, signRefreshToken, verifyToken } from "../utils/jwt";
-import { Cacheable, redis } from "../cache";
+import { redis } from "../cache";
 import { config } from "../config/index";
 import { BusinessError } from "../utils/response";
 import wechatService from "./wechat.service";
@@ -239,7 +239,6 @@ class AuthService {
   }
 
   /** 获取用户信息（含菜单树和权限列表） */
-  @Cacheable({ key: (userId: number) => 'user:info:' + userId, ttl: 0 })
   async getUserInfo(userId: number): Promise<{
     id: number;
     username: string;

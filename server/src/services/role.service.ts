@@ -133,14 +133,13 @@ class RoleService {
     return { roleId, menuIds };
   }
 
-  /** 清除角色的用户缓存（user:perm + user:info） */
+  /** 清除角色的用户缓存（user:perm） */
   private async clearRoleUserCache(roleId: number) {
     const UserRole = require("../models/UserRole").default;
     const userRoles = await UserRole.findAll({ where: { roleId } });
     const deletePromises: Promise<any>[] = [];
     for (const ur of userRoles) {
       deletePromises.push(redis.del("user:perm:" + (ur as any).userId));
-      deletePromises.push(redis.del("user:info:" + (ur as any).userId));
     }
     await Promise.all(deletePromises);
   }

@@ -112,7 +112,6 @@ class UserService {
 
     // 清除缓存
     await redis.del(`user:perm:${id}`);
-    await redis.del(`user:info:${id}`);
 
     return user;
   }
@@ -128,7 +127,6 @@ class UserService {
     await user.destroy();
     // 清除缓存
     await redis.del(`user:perm:${id}`);
-    await redis.del(`user:info:${id}`);
     await redis.del(`refresh_token:${id}`);
   }
 
@@ -144,7 +142,6 @@ class UserService {
     if (status === "2") {
       // 禁用时清除 token 和缓存
       await redis.del(`user:perm:${id}`);
-      await redis.del(`user:info:${id}`);
       await redis.del(`refresh_token:${id}`);
     }
 
@@ -169,7 +166,6 @@ class UserService {
 
     // 清除缓存
     await redis.del(`user:perm:${userId}`);
-    await redis.del(`user:info:${userId}`);
 
     return { userId, roleIds };
   }
