@@ -15,6 +15,7 @@ import * as orderApi from "@/api/order";
 import { useUserStore } from "@/stores/user";
 import { useDict } from "@/composables/useDict";
 import { OrderStatus, RefundStatus } from "@/types/order.d";
+import { hasPerm } from "@/utils/perm";
 
 defineOptions({ name: "SystemOrder" });
 
@@ -216,6 +217,7 @@ function refundStatusLabel(status: string) {
 
           <a-button
             v-if="['PAID', 'PARTIAL_REFUND'].includes(record.status)"
+            v-has="['order:refund']"
             size="small"
             @click="handleRefund(record)"
           >

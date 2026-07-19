@@ -21,6 +21,7 @@ try {
 
 import App from './App.vue'
 import router from './router'
+import vHas from './directives/has'
 import './styles/global.less'
 
 dayjs.locale('zh-cn')
@@ -30,5 +31,6 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(Antd)
+app.directive('has', vHas)
 
 app.mount('#app')
