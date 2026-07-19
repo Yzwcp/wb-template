@@ -10,6 +10,7 @@ defineOptions({ name: 'SystemMenu' })
 
 const treeData = ref<any[]>([])
 const selectedMenu = ref<any>(null)
+const editingMenuId = ref<number | null>(null)
 const isEditing = ref(false)
 const formRef = ref<InstanceType<typeof SForm> | null>(null)
 const formModel = ref<Record<string, any>>({})
@@ -117,6 +118,7 @@ function handleTreeSelect(selectedKeys: any[], info: any) {
   const node = info?.node
   if (node) {
     selectedMenu.value = node
+    editingMenuId.value = node.id
     formModel.value = {
       parentId: node.parentId,
       name: node.name || node.title,
@@ -146,6 +148,7 @@ function handleAddButton() {
   }
   const parentId = selectedMenu.value.id
   selectedMenu.value = null
+  editingMenuId.value = null
   formModel.value = {
     parentId,
     name: '',
@@ -164,6 +167,7 @@ function handleAddButton() {
 
 function handleAddRoot() {
   selectedMenu.value = null
+  editingMenuId.value = null
   formModel.value = {
     parentId: undefined,
     name: '',
@@ -191,6 +195,7 @@ function handleAddChild() {
   }
   const parentId = selectedMenu.value.id
   selectedMenu.value = null
+  editingMenuId.value = null
   formModel.value = {
     parentId,
     name: '',
@@ -237,8 +242,8 @@ async function handleSave() {
 
   const values = formRef.value.getValues()
   try {
-    if (selectedMenu.value && selectedMenu.value.id) {
-      await menuApi.update(selectedMenu.value.id, values)
+    if (editingMenuId.value) {
+      await menuApi.update(editingMenuId.value, values)
       message.success('更新成功')
     } else {
       await menuApi.create(values)
@@ -255,8 +260,10 @@ function handleCancel() {
   isEditing.value = false
   if (!selectedMenu.value?.id) {
     selectedMenu.value = null
+    editingMenuId.value = null
   } else {
     formModel.value = { ...selectedMenu.value }
+    editingMenuId.value = selectedMenu.value.id
   }
 }
 
