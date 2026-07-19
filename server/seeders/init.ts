@@ -140,8 +140,31 @@ async function seed() {
             { name: '清理队列', type: 'F', path: '', component: '', icon: '', permission: 'sys:queue:delete', sort: 4 },
           ],
         },
+        {
+          name: '微信配置', type: 'C', path: '/system/wechat-config', component: '/system/wechat-config', icon: 'MessageOutlined', permission: '', sort: 11, children: [
+            { name: '查询配置', type: 'F', path: '', component: '', icon: '', permission: 'sys:wechat:config:list', sort: 1 },
+            { name: '编辑配置', type: 'F', path: '', component: '', icon: '', permission: 'sys:wechat:config:edit', sort: 2 },
+          ],
+        },
       ],
     },
+  {
+    name: '商品管理', type: 'M', path: '/product', component: '', icon: 'ShoppingCartOutlined', permission: '', sort: 2, children: [
+      {
+        name: '商品列表', type: 'C', path: '/product/list', component: '/product/list', icon: 'UnorderedListOutlined', permission: '', sort: 1, children: [
+          { name: '查询商品', type: 'F', path: '', component: '', icon: '', permission: 'sys:product:list', sort: 1 },
+          { name: '新增商品', type: 'F', path: '', component: '', icon: '', permission: 'sys:product:add', sort: 2 },
+          { name: '编辑商品', type: 'F', path: '', component: '', icon: '', permission: 'sys:product:edit', sort: 3 },
+          { name: '删除商品', type: 'F', path: '', component: '', icon: '', permission: 'sys:product:remove', sort: 4 },
+        ],
+      },
+      {
+        name: '订单列表', type: 'C', path: '/product/order', component: '/product/order', icon: 'ProfileOutlined', permission: '', sort: 2, children: [
+          { name: '查询订单', type: 'F', path: '', component: '', icon: '', permission: 'sys:order:list', sort: 1 },
+        ],
+      },
+  ],
+  },
   ];
 
   // 递归创建菜单
