@@ -44,7 +44,7 @@ watch(
 /** 将菜单列表转换为 Ant Design Menu 的 items 格式 */
 function convertMenuItems(menus: any[]): any[] {
   return menus
-    .filter((m) => !m.hidden && m.type !== "F") // 过滤隐藏项和按钮(F)
+    .filter((m) => m.visible !== 0 && m.type !== "F") // 过滤隐藏项和按钮(F)
     .map((item) => {
       const menuItem: any = {
         key: item.path?.startsWith("/") ? item.path : `/${item.path}`,
@@ -59,7 +59,7 @@ function convertMenuItems(menus: any[]): any[] {
 
       // 目录类型(M)或菜单类型(C)有子节点时递归
       const visibleChildren = item.children?.filter(
-        (c: any) => !c.hidden && c.type !== "F",
+        (c: any) => c.visible !== 0 && c.type !== "F",
       );
       if (visibleChildren && visibleChildren.length > 0) {
         menuItem.children = convertMenuItems(item.children);

@@ -93,7 +93,7 @@ class MenuService {
     return menu;
   }
 
-  /** 删除菜单（有子菜单时不允许删除） */
+  /** 删除菜单（级联删除子菜单及角色关联） */
   @CacheEvict({ keys: [(id: number) => 'menu:' + id, 'menu:tree'] })
   async remove(id: number) {
     const menu = await Menu.findByPk(id);
@@ -101,13 +101,24 @@ class MenuService {
       throw new BusinessError(400, '菜单不存在');
     }
 
-    const children = await Menu.findAll({ where: { parentId: id } });
-    if (children.length > 0) {
-      throw new BusinessError(400, '存在子菜单，无法删除');
-    }
+    // 递归收集所有子孙菜单 ID
+    const allIds = await this.collectChildIds(id);
+    allIds.push(id);
 
-    await RoleMenu.destroy({ where: { menuId: id } });
-    await menu.destroy();
+    // 删除角色-菜单关联
+    await RoleMenu.destroy({ where: { menuId: { [Op.in]: allIds } } });
+    // 删除所有子菜单
+    await Menu.destroy({ where: { id: { [Op.in]: allIds } } });
+  }
+
+  /** 递归收集子菜单 ID */
+  private async collectChildIds(parentId: number): Promise<number[]> {
+    const children = await Menu.findAll({ where: { parentId }, attributes: ['id'] });
+    const ids = children.map(c => c.id);
+    for (const id of ids) {
+      ids.push(...await this.collectChildIds(id));
+    }
+    return ids;
   }
 
   /** 构建菜单树 */

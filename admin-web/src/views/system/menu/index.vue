@@ -10,6 +10,7 @@ defineOptions({ name: 'SystemMenu' })
 
 const treeData = ref<any[]>([])
 const selectedMenu = ref<any>(null)
+const editingMenuId = ref<number | null>(null)
 const isEditing = ref(false)
 const formRef = ref<InstanceType<typeof SForm> | null>(null)
 const formModel = ref<Record<string, any>>({})
@@ -24,7 +25,7 @@ const menuTypeOptions = [
 
 const parentTreeData = computed<TreeNode[]>(() => {
   const convert = (data: any[]): TreeNode[] => {
-    return (data || []).map((item: any) => ({
+    return (data || []).filter((item: any) => item.type !== 'F').map((item: any) => ({
       id: item.id,
       label: item.name,
       value: item.id,
@@ -85,6 +86,14 @@ async function loadTree() {
   }
 }
 
+// 菜单类型标签映射
+function getTypeTag(type: string) {
+  if (type === 'M') return { color: 'blue', label: '目录' };
+  if (type === 'C') return { color: 'green', label: '菜单' };
+  if (type === 'F') return { color: 'orange', label: '按钮' };
+  return { color: 'default', label: type };
+}
+
 function formatTreeData(data: any[]): any[] {
   return data.map((item) => ({
     key: item.id,
@@ -98,8 +107,9 @@ function formatTreeData(data: any[]): any[] {
     icon: item.icon,
     permission: item.permission,
     sort: item.sort,
-    visible: item.visible !== undefined ? item.visible : true,
-    status: item.status !== undefined ? item.status : 1,
+    // visible 来自后端是 number (1/0), 存到 tree node 时保留原始值供 form 使用
+    visible: item.visible,
+    status: item.status,
     children: item.children ? formatTreeData(item.children) : undefined,
   }))
 }
@@ -108,6 +118,7 @@ function handleTreeSelect(selectedKeys: any[], info: any) {
   const node = info?.node
   if (node) {
     selectedMenu.value = node
+    editingMenuId.value = node.id
     formModel.value = {
       parentId: node.parentId,
       name: node.name || node.title,
@@ -117,15 +128,45 @@ function handleTreeSelect(selectedKeys: any[], info: any) {
       icon: node.icon || '',
       permission: node.permission || '',
       sort: node.sort ?? 0,
-      visible: node.visible !== undefined ? node.visible : true,
-      status: node.status !== undefined ? node.status : 1,
+      // switch 组件需要 boolean，后端存的是 number(1/0)
+      visible: node.visible === 1 || node.visible === true,
+      status: node.status ?? 1,
     }
     isEditing.value = true
   }
 }
 
+
+function handleAddButton() {
+  if (!selectedMenu.value) {
+    message.warning('请先选择父菜单')
+    return
+  }
+  if (selectedMenu.value.type === 'F') {
+    message.warning('按钮类型不能添加子菜单')
+    return
+  }
+  const parentId = selectedMenu.value.id
+  selectedMenu.value = null
+  editingMenuId.value = null
+  formModel.value = {
+    parentId,
+    name: '',
+    type: 'F',
+    path: '',
+    component: '',
+    icon: '',
+    permission: '',
+    sort: 0,
+    visible: true,
+    status: 1,
+  }
+  isEditing.value = true
+}
+
 function handleAddRoot() {
   selectedMenu.value = null
+  editingMenuId.value = null
   formModel.value = {
     parentId: undefined,
     name: '',
@@ -139,7 +180,6 @@ function handleAddRoot() {
     status: 1,
   }
   isEditing.value = true
-  nextTick(() => formRef.value?.resetFields())
 }
 
 function handleAddChild() {
@@ -151,8 +191,11 @@ function handleAddChild() {
     message.warning('按钮类型不能添加子菜单')
     return
   }
+  const parentId = selectedMenu.value.id
+  selectedMenu.value = null
+  editingMenuId.value = null
   formModel.value = {
-    parentId: selectedMenu.value.id,
+    parentId,
     name: '',
     type: 'M',
     path: '',
@@ -164,7 +207,6 @@ function handleAddChild() {
     status: 1,
   }
   isEditing.value = true
-  nextTick(() => formRef.value?.resetFields())
 }
 
 async function handleDelete() {
@@ -197,8 +239,8 @@ async function handleSave() {
 
   const values = formRef.value.getValues()
   try {
-    if (selectedMenu.value && selectedMenu.value.id) {
-      await menuApi.update(selectedMenu.value.id, values)
+    if (editingMenuId.value) {
+      await menuApi.update(editingMenuId.value, values)
       message.success('更新成功')
     } else {
       await menuApi.create(values)
@@ -215,8 +257,10 @@ function handleCancel() {
   isEditing.value = false
   if (!selectedMenu.value?.id) {
     selectedMenu.value = null
+    editingMenuId.value = null
   } else {
     formModel.value = { ...selectedMenu.value }
+    editingMenuId.value = selectedMenu.value.id
   }
 }
 
