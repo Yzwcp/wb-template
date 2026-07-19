@@ -41,6 +41,11 @@ export function removeFile(id: number): Promise<void> {
   return request.post(`/api/file/${id}/delete`)
 }
 
+/** 移动文件到分组 */
+export function moveToGroup(data: { fileIds: number[]; groupId: number | null }): Promise<{ affectedCount: number }> {
+  return request.post("/api/file/move-to-group", data)
+}
+
 // ===== 文件分组 =====
 export interface FileGroup { id: number; name: string; sort: number }
 

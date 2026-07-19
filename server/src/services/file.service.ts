@@ -176,6 +176,16 @@ class FileService {
     await file.destroy();
   }
 
+  /** 移动文件到分组 */
+  async moveToGroup(fileIds: number[], groupId: number | null) {
+    const { Op } = require("sequelize");
+    const [affectedCount] = await SysFile.update(
+      { groupId },
+      { where: { id: { [Op.in]: fileIds } } },
+    );
+    return { affectedCount };
+  }
+
   // ===== 分组管理 =====
 
   async getGroups() {

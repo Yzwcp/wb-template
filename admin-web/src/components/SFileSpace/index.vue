@@ -14,6 +14,7 @@ import {
   EditOutlined,
   EyeOutlined,
   CopyOutlined,
+  FolderOutlined,
 } from "@ant-design/icons-vue";
 import * as fileApi from "@/api/file";
 import type { FileRecord, FileGroup } from "@/api/file";
@@ -33,6 +34,8 @@ const emit = defineEmits<{
 const loading = ref(false);
 const fileList = ref<FileRecord[]>([]);
 const selectedIds = ref<Set<number>>(new Set());
+const moveModalVisible = ref(false);
+const moveTargetGroupId = ref<number | null>(null);
 const currentPage = ref(1);
 const total = ref(0);
 const keyword = ref("");
@@ -383,6 +386,27 @@ async function handleCopyLink(file: FileRecord, e: Event) {
   }
 }
 
+function handleMoveToGroup() {
+  moveTargetGroupId.value = null;
+  moveModalVisible.value = true;
+}
+
+async function doMoveToGroup() {
+  if (selectedIds.value.size === 0) return;
+  try {
+    const result = await fileApi.moveToGroup({
+      fileIds: Array.from(selectedIds.value),
+      groupId: moveTargetGroupId.value,
+    });
+    message.success(`成功移动 ${result.affectedCount} 个文件`);
+    moveModalVisible.value = false;
+    selectedIds.value = new Set();
+    loadFiles();
+  } catch (err: any) {
+    message.error(err?.message || "移动失败");
+  }
+}
+
 function handleConfirm() {
   if (selectedIds.value.size === 0) {
     message.warning("请选择文件");
@@ -655,6 +679,7 @@ watch(
             <span class="selected-count" v-if="selectedIds.size > 0"
               >已选 {{ selectedIds.size }} 个</span
             >
+            <a-button v-if="selectedIds.size > 0" @click="handleMoveToGroup"><FolderOutlined /> 移动分组</a-button>
             <a-button @click="handleCancel">取消</a-button>
             <a-button
               type="primary"
@@ -667,6 +692,36 @@ watch(
       </div>
     </div>
   </a-modal>
+
+  <!-- 移动分组弹窗 -->
+  <a-modal
+    :open="moveModalVisible"
+    title="移动到分组"
+    width="400px"
+    @cancel="moveModalVisible = false"
+    @ok="doMoveToGroup"
+    :ok-button-props="{ disabled: moveTargetGroupId === null }"
+  >
+    <div class="move-group-list">
+      <div
+        class="move-group-item"
+        :class="{ active: moveTargetGroupId === null }"
+        @click="moveTargetGroupId = null"
+      >
+        未分组
+      </div>
+      <div
+        v-for="g in groups"
+        :key="g.id"
+        class="move-group-item"
+        :class="{ active: moveTargetGroupId === g.id }"
+        @click="moveTargetGroupId = g.id"
+      >
+        {{ g.name }}
+      </div>
+    </div>
+  </a-modal>
+
 
   <!-- 预览弹窗 -->
   <a-modal
@@ -910,6 +965,27 @@ watch(
 }
 
 /* 预览弹窗 */
+.move-group-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.move-group-item {
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  &:hover {
+    background: #f5f5f5;
+  }
+  &.active {
+    background: #e6f4ff;
+    color: #1677ff;
+    font-weight: 500;
+  }
+}
+
+
 .preview-container {
   display: flex;
   align-items: center;

@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import { config } from "../config";
 
-const router = Router();
+const router: Router = Router();
 
 router.use(auth);
 
@@ -50,6 +50,9 @@ router.post(
   requirePermission("sys:file:remove"),
   fileController.remove,
 );
+
+// 移动文件到分组
+router.post("/move-to-group", requirePermission("sys:file:update"), fileController.moveToGroup);
 
 // ===== 文件分组 =====
 router.get("/groups/list", fileController.getGroups);

@@ -63,6 +63,9 @@ function convertMenuItems(menus: any[]): any[] {
       );
       if (visibleChildren && visibleChildren.length > 0) {
         menuItem.children = convertMenuItems(item.children);
+      } else if (item.children?.length) {
+        // 子菜单全是按钮(F)时父级仍显示
+        menuItem.children = [];
       }
 
       return menuItem;

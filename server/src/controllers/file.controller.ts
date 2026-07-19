@@ -84,6 +84,18 @@ export async function remove(req: Request, res: Response): Promise<void> {
 
 // ==================== 文件分组 ====================
 
+/** 移动文件到分组 */
+export async function moveToGroup(req: Request, res: Response): Promise<void> {
+  const { fileIds, groupId } = req.body;
+  if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+    res.json(fail(400, "fileIds 不能为空"));
+    return;
+  }
+  const result = await fileService.moveToGroup(fileIds, groupId || null);
+  res.json(success(result, `成功移动 ${result.affectedCount} 个文件`));
+}
+
+
 /** 获取分组列表 */
 export async function getGroups(_req: Request, res: Response): Promise<void> {
   const groups = await fileService.getGroups();
