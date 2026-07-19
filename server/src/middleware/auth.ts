@@ -46,7 +46,9 @@ export async function auth(
       userStatus = parsed.status || null;
       // 缓存命中也检查用户是否被禁用
       if (userStatus === "2") {
-        res.status(401).json({ code: 401, data: null, message: "用户已被禁用" });
+        res
+          .status(401)
+          .json({ code: 401, data: null, message: "用户已被禁用" });
         return;
       }
     } else {
@@ -84,7 +86,11 @@ export async function auth(
       permissions = [...new Set([...menuPerms, ...directPerms])];
 
       // 缓存 30 分钟，包含 status 以便缓存命中时检查
-      await redis.setex(cacheKey, 1800, JSON.stringify({ permissions, roles, status: user.status }));
+      await redis.setex(
+        cacheKey,
+        1800,
+        JSON.stringify({ permissions, roles, status: user.status }),
+      );
     }
 
     req.user = { ...payload, permissions, roles };

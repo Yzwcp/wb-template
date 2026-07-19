@@ -1,105 +1,115 @@
 <script setup lang="ts">
-import { ref, onMounted, h, computed } from 'vue'
-import { message, Popconfirm } from 'ant-design-vue'
-import { PlusOutlined } from '@ant-design/icons-vue'
-import STable from '@/components/STable/index.vue'
-import type { Column, SearchField } from '@/types'
-import * as roleApi from '@/api/role'
-import * as menuApi from '@/api/menu'
-import dayjs from 'dayjs'
-import RoleFormModal from './components/RoleFormModal.vue'
-import { useDict } from '@/composables/useDict'
+import { ref, onMounted, h, computed } from "vue";
+import { message, Popconfirm } from "ant-design-vue";
+import { PlusOutlined } from "@ant-design/icons-vue";
+import STable from "@/components/STable/index.vue";
+import type { Column, SearchField } from "@/types";
+import * as roleApi from "@/api/role";
+import * as menuApi from "@/api/menu";
+import dayjs from "dayjs";
+import RoleFormModal from "./components/RoleFormModal.vue";
+import { useDict } from "@/composables/useDict";
 
-defineOptions({ name: 'SystemRole' })
+defineOptions({ name: "SystemRole" });
 
 const { loadDict, getLabel, getOptions } = useDict();
 
-const tableRef = ref<InstanceType<typeof STable> | null>(null)
-const modalVisible = ref(false)
-const editingRecord = ref<any>(null)
-const modalTitle = ref('新增角色')
+const tableRef = ref<InstanceType<typeof STable> | null>(null);
+const modalVisible = ref(false);
+const editingRecord = ref<any>(null);
+const modalTitle = ref("新增角色");
 
 // Menu assignment dialog
-const menuDialogVisible = ref(false)
-const menuTreeData = ref<any[]>([])
-const checkedMenuKeys = ref<number[]>([])
-const currentRoleId = ref<number>(0)
-const menuLoading = ref(false)
+const menuDialogVisible = ref(false);
+const menuTreeData = ref<any[]>([]);
+const checkedMenuKeys = ref<number[]>([]);
+const currentRoleId = ref<number>(0);
+const menuLoading = ref(false);
 
 const columns: Column[] = [
-  { title: '角色名称', dataIndex: 'name', width: 150 },
-  { title: '角色编码', dataIndex: 'code', width: 150 },
-  { title: '描述', dataIndex: 'description', width: 200, ellipsis: true },
+  { title: "角色名称", dataIndex: "name", width: 150 },
+  { title: "角色编码", dataIndex: "code", width: 150 },
+  { title: "描述", dataIndex: "description", width: 200, ellipsis: true },
   {
-    title: '状态',
-    dataIndex: 'status',
+    title: "状态",
+    dataIndex: "status",
     width: 80,
     customRender: ({ text }) => {
-      return h('a-tag', { color: text === 1 ? 'green' : 'red' }, getLabel('SYS_ENABLE', text))
+      return h(
+        "a-tag",
+        { color: text === 1 ? "green" : "red" },
+        getLabel("SYS_ENABLE", text),
+      );
     },
   },
   {
-    title: '创建时间',
-    dataIndex: 'createdAt',
+    title: "创建时间",
+    dataIndex: "createdAt",
     width: 170,
-    customRender: ({ text }) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-'),
+    customRender: ({ text }) =>
+      text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "-",
   },
-  { title: '操作', dataIndex: '_action', key: '_action', width: 260, fixed: 'right' },
-]
+  {
+    title: "操作",
+    dataIndex: "_action",
+    key: "_action",
+    width: 260,
+    fixed: "right",
+  },
+];
 
 const searchFields = computed<SearchField[]>(() => [
-  { label: '角色名称', name: 'name', type: 'input' },
+  { label: "角色名称", name: "name", type: "input" },
   {
-    label: '状态',
-    name: 'status',
-    type: 'select',
-    options: getOptions('SYS_ENABLE'),
+    label: "状态",
+    name: "status",
+    type: "select",
+    options: getOptions("SYS_ENABLE"),
   },
-])
+]);
 
 function handleAdd() {
-  editingRecord.value = null
-  modalTitle.value = '新增角色'
-  modalVisible.value = true
+  editingRecord.value = null;
+  modalTitle.value = "新增角色";
+  modalVisible.value = true;
 }
 
 function handleEdit(record: any) {
-  editingRecord.value = { ...record }
-  modalTitle.value = '编辑角色'
-  modalVisible.value = true
+  editingRecord.value = { ...record };
+  modalTitle.value = "编辑角色";
+  modalVisible.value = true;
 }
 
 async function handleDelete(record: any) {
   try {
-    await roleApi.remove(record.id)
-    message.success('删除成功')
-    tableRef.value?.refresh()
-  } catch (err: any) {
-  }
+    await roleApi.remove(record.id);
+    message.success("删除成功");
+    tableRef.value?.refresh();
+  } catch (err: any) {}
 }
 
 function handleModalSuccess() {
-  modalVisible.value = false
-  tableRef.value?.refresh()
+  modalVisible.value = false;
+  tableRef.value?.refresh();
 }
 
 // Menu assignment
 async function handleAssignMenus(record: any) {
-  currentRoleId.value = record.id
-  menuLoading.value = true
+  currentRoleId.value = record.id;
+  menuLoading.value = true;
   try {
     const [tree, roleDetail] = await Promise.all([
       menuApi.getTree(),
       roleApi.getById(record.id),
-    ])
-    menuTreeData.value = formatTree(tree || [])
+    ]);
+    menuTreeData.value = formatTree(tree || []);
     // 后端返回 menus: [{id:1},...]，提取 id 数组
-    const rawMenus = roleDetail?.menus || roleDetail?.menuIds || []
-    checkedMenuKeys.value = rawMenus.map((m: any) => m.id ?? m)
-    menuDialogVisible.value = true
+    const rawMenus = roleDetail?.menus || roleDetail?.menuIds || [];
+    checkedMenuKeys.value = rawMenus.map((m: any) => m.id ?? m);
+    menuDialogVisible.value = true;
   } catch (err: any) {
   } finally {
-    menuLoading.value = false
+    menuLoading.value = false;
   }
 }
 
@@ -108,29 +118,28 @@ function formatTree(data: any[]): any[] {
     key: item.id,
     title: item.name,
     children: item.children ? formatTree(item.children) : undefined,
-  }))
+  }));
 }
 
 async function handleSaveMenus() {
   try {
-    const halfCheckedKeys = menuDialogRef.value?.halfCheckedKeys || []
-    const allKeys = [...checkedMenuKeys.value, ...halfCheckedKeys]
-    await roleApi.assignMenus(currentRoleId.value, allKeys)
-    message.success('菜单分配成功')
-    menuDialogVisible.value = false
-  } catch (err: any) {
-  }
+    const halfCheckedKeys = menuDialogRef.value?.halfCheckedKeys || [];
+    const allKeys = [...checkedMenuKeys.value, ...halfCheckedKeys];
+    await roleApi.assignMenus(currentRoleId.value, allKeys);
+    message.success("菜单分配成功");
+    menuDialogVisible.value = false;
+  } catch (err: any) {}
 }
 
-const menuDialogRef = ref<any>(null)
+const menuDialogRef = ref<any>(null);
 
 function handleMenuCheck(checkedKeys: any) {
-  checkedMenuKeys.value = checkedKeys.checked || checkedKeys
+  checkedMenuKeys.value = checkedKeys.checked || checkedKeys;
 }
 
 onMounted(async () => {
-  await loadDict('SYS_ENABLE')
-})
+  await loadDict("SYS_ENABLE");
+});
 </script>
 
 <template>
@@ -181,7 +190,7 @@ onMounted(async () => {
       @ok="handleSaveMenus"
     >
       <a-spin :spinning="menuLoading">
-        <div style="max-height: 400px; overflow-y: auto;">
+        <div style="max-height: 800px; overflow-y: auto">
           <a-tree
             ref="menuDialogRef"
             v-model:checkedKeys="checkedMenuKeys"

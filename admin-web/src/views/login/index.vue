@@ -5,6 +5,7 @@ import { message } from "ant-design-vue";
 import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
 import { useUserStore } from "@/stores/user";
 import type { LoginParams } from "@/types/menu";
+import { useDictStore } from "@/stores/dict";
 
 const router = useRouter();
 const route = useRoute();
@@ -28,11 +29,15 @@ async function handleSubmit() {
 
   try {
     // await formRef.value?.validate();
+
+    const dictStore = useDictStore();
+    // 页面初始化时加载所有字典，登录页即可使用，不阻塞渲染
     loading.value = true;
     await userStore.login(formState);
     message.success("登录成功");
     const redirect = (route.query.redirect as string) || "/";
     router.push(redirect);
+    dictStore.loadAll();
   } catch (err: any) {
     console.error(err);
   } finally {

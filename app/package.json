@@ -2,8 +2,8 @@
   "name": "app-wecom",
   "version": "1.0.0",
   "scripts": {
-    "dev:mp-weixin": "cross-env UNI_INPUT_DIR=. uni -p mp-weixin",
-    "build:mp-weixin": "cross-env UNI_INPUT_DIR=. uni build -p mp-weixin",
+    "dev:wx": "cross-env UNI_INPUT_DIR=. uni -p mp-weixin",
+    "build:wx": "cross-env UNI_INPUT_DIR=. uni build -p mp-weixin",
     "dev:h5": "cross-env UNI_INPUT_DIR=. uni -p h5",
     "build:h5": "cross-env UNI_INPUT_DIR=. uni build -p h5"
   },
