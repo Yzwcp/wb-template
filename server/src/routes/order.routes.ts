@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as orderController from "../controllers/order.controller";
 import { auth, requirePermission } from "../middleware/auth";
 
-const router = Router();
+const router: Router = Router();
 
 // 支付/退款回调已迁移到统一回调 → POST /api/callback/notify
 // 保留旧路由做兼容转发

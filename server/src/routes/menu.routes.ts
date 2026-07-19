@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as menuController from "../controllers/menu.controller";
 import { auth, requirePermission } from "../middleware/auth";
 
-const router = Router();
+const router: Router = Router();
 
 router.use(auth);
 

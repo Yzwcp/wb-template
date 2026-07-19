@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as dictController from "../controllers/dict.controller";
 import { auth, requirePermission } from "../middleware/auth";
 
-const router = Router();
+const router: Router = Router();
 
 router.use(auth);
 
