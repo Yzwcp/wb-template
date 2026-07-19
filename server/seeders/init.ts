@@ -59,8 +59,8 @@ async function seed() {
           name: '用户管理', type: 'C', path: '/system/user', component: '/system/user', icon: 'UserOutlined', permission: '', sort: 1, children: [
             { name: '查询用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:list', sort: 1 },
             { name: '新增用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:add', sort: 2 },
-            { name: '编辑用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:edit', sort: 3 },
-            { name: '删除用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:remove', sort: 4 },
+            { name: '编辑用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:update', sort: 3 },
+            { name: '删除用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:delete', sort: 4 },
             { name: '导入用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:import', sort: 5 },
             { name: '导出用户', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:export', sort: 6 },
             { name: '分配角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:user:role', sort: 7 },
@@ -70,8 +70,8 @@ async function seed() {
           name: '角色管理', type: 'C', path: '/system/role', component: '/system/role', icon: 'TeamOutlined', permission: '', sort: 2, children: [
             { name: '查询角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:list', sort: 1 },
             { name: '新增角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:add', sort: 2 },
-            { name: '编辑角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:edit', sort: 3 },
-            { name: '删除角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:remove', sort: 4 },
+            { name: '编辑角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:update', sort: 3 },
+            { name: '删除角色', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:delete', sort: 4 },
             { name: '分配菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:role:menu', sort: 5 },
           ],
         },
@@ -79,31 +79,31 @@ async function seed() {
           name: '菜单管理', type: 'C', path: '/system/menu', component: '/system/menu', icon: 'MenuOutlined', permission: '', sort: 3, children: [
             { name: '查询菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:menu:list', sort: 1 },
             { name: '新增菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:menu:add', sort: 2 },
-            { name: '编辑菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:menu:edit', sort: 3 },
-            { name: '删除菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:menu:remove', sort: 4 },
+            { name: '编辑菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:menu:update', sort: 3 },
+            { name: '删除菜单', type: 'F', path: '', component: '', icon: '', permission: 'sys:menu:delete', sort: 4 },
           ],
         },
         {
           name: '权限管理', type: 'C', path: '/system/permission', component: '/system/permission', icon: 'SafetyOutlined', permission: '', sort: 4, children: [
             { name: '查询权限', type: 'F', path: '', component: '', icon: '', permission: 'sys:permission:list', sort: 1 },
             { name: '新增权限', type: 'F', path: '', component: '', icon: '', permission: 'sys:permission:add', sort: 2 },
-            { name: '编辑权限', type: 'F', path: '', component: '', icon: '', permission: 'sys:permission:edit', sort: 3 },
-            { name: '删除权限', type: 'F', path: '', component: '', icon: '', permission: 'sys:permission:remove', sort: 4 },
+            { name: '编辑权限', type: 'F', path: '', component: '', icon: '', permission: 'sys:permission:update', sort: 3 },
+            { name: '删除权限', type: 'F', path: '', component: '', icon: '', permission: 'sys:permission:delete', sort: 4 },
           ],
         },
         {
           name: '字典管理', type: 'C', path: '/system/dict', component: '/system/dict', icon: 'BookOutlined', permission: '', sort: 5, children: [
             { name: '查询字典', type: 'F', path: '', component: '', icon: '', permission: 'sys:dict:list', sort: 1 },
             { name: '新增字典', type: 'F', path: '', component: '', icon: '', permission: 'sys:dict:add', sort: 2 },
-            { name: '编辑字典', type: 'F', path: '', component: '', icon: '', permission: 'sys:dict:edit', sort: 3 },
-            { name: '删除字典', type: 'F', path: '', component: '', icon: '', permission: 'sys:dict:remove', sort: 4 },
+            { name: '编辑字典', type: 'F', path: '', component: '', icon: '', permission: 'sys:dict:update', sort: 3 },
+            { name: '删除字典', type: 'F', path: '', component: '', icon: '', permission: 'sys:dict:delete', sort: 4 },
           ],
         },
         {
           name: '缓存管理', type: 'C', path: '/system/cache', component: '/system/cache', icon: 'DatabaseOutlined', permission: '', sort: 6, children: [
             { name: '查询缓存', type: 'F', path: '', component: '', icon: '', permission: 'sys:cache:list', sort: 1 },
             { name: '查询详情', type: 'F', path: '', component: '', icon: '', permission: 'sys:cache:query', sort: 2 },
-            { name: '删除缓存', type: 'F', path: '', component: '', icon: '', permission: 'sys:cache:remove', sort: 3 },
+            { name: '删除缓存', type: 'F', path: '', component: '', icon: '', permission: 'sys:cache:delete', sort: 3 },
           ],
         },
         {
@@ -111,15 +111,16 @@ async function seed() {
             { name: '查询文件', type: 'F', path: '', component: '', icon: '', permission: 'sys:file:list', sort: 1 },
             { name: '上传文件', type: 'F', path: '', component: '', icon: '', permission: 'sys:file:upload', sort: 2 },
             { name: '下载文件', type: 'F', path: '', component: '', icon: '', permission: 'sys:file:download', sort: 3 },
-            { name: '删除文件', type: 'F', path: '', component: '', icon: '', permission: 'sys:file:remove', sort: 4 },
+            { name: '删除文件', type: 'F', path: '', component: '', icon: '', permission: 'sys:file:delete', sort: 4 },
+            { name: '更新文件', type: 'F', path: '', component: '', icon: '', permission: 'sys:file:update', sort: 5 },
           ],
         },
         {
           name: '定时任务', type: 'C', path: '/system/task', component: '/system/task', icon: 'ClockCircleOutlined', permission: '', sort: 8, children: [
             { name: '查询任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:list', sort: 1 },
             { name: '新增任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:add', sort: 2 },
-            { name: '编辑任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:edit', sort: 3 },
-            { name: '删除任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:remove', sort: 4 },
+            { name: '编辑任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:update', sort: 3 },
+            { name: '删除任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:delete', sort: 4 },
             { name: '执行任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:execute', sort: 5 },
             { name: '暂停任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:pause', sort: 6 },
             { name: '查看日志', type: 'F', path: '', component: '', icon: '', permission: 'sys:task:log', sort: 7 },
@@ -128,7 +129,7 @@ async function seed() {
         {
           name: '操作日志', type: 'C', path: '/system/log', component: '/system/log', icon: 'FileTextOutlined', permission: '', sort: 9, children: [
             { name: '查询日志', type: 'F', path: '', component: '', icon: '', permission: 'sys:log:list', sort: 1 },
-            { name: '清空日志', type: 'F', path: '', component: '', icon: '', permission: 'sys:log:remove', sort: 2 },
+            { name: '清空日志', type: 'F', path: '', component: '', icon: '', permission: 'sys:log:delete', sort: 2 },
           ],
         },
         {
@@ -136,7 +137,7 @@ async function seed() {
             { name: '查询队列', type: 'F', path: '', component: '', icon: '', permission: 'sys:queue:list', sort: 1 },
             { name: '查询任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:queue:query', sort: 2 },
             { name: '重试任务', type: 'F', path: '', component: '', icon: '', permission: 'sys:queue:retry', sort: 3 },
-            { name: '清理队列', type: 'F', path: '', component: '', icon: '', permission: 'sys:queue:remove', sort: 4 },
+            { name: '清理队列', type: 'F', path: '', component: '', icon: '', permission: 'sys:queue:delete', sort: 4 },
           ],
         },
       ],
