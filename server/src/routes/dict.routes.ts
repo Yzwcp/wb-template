@@ -4,6 +4,10 @@ import { auth, requirePermission } from "../middleware/auth";
 
 const router: Router = Router();
 
+// ===== 公共接口：前端初始化时无需登录即可加载所有字典 =====
+router.get("/all", dictController.getAll);
+router.get("/type/all", dictController.getAll);
+
 router.use(auth);
 
 // ============ 字典类型 ============
@@ -25,7 +29,6 @@ router.get(
 );
 
 // 获取所有字典（前端初始化，仅需登录）
-router.get("/all", dictController.getAll);
 
 // 创建字典类型
 router.post(

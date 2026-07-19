@@ -2,7 +2,6 @@
 import { staticRoutes } from './routes'
 import { generateRoutes } from './dynamic'
 import { useUserStore } from '@/stores/user'
-import { useDictStore } from '@/stores/dict'
 import { getToken } from '@/utils/token'
 
 const router = createRouter({
@@ -35,10 +34,6 @@ router.beforeEach(async (to, _from, next) => {
         if (!userStore.menusLoaded) {
           await userStore.fetchUserInfo()
         }
-
-        // 加载所有字典（失败不阻塞登录）
-        const dictStore = useDictStore()
-        try { await dictStore.loadAll() } catch { /* 字典加载失败 */ }
 
         const dynamicRoutes = generateRoutes(userStore.menus)
         for (const route of dynamicRoutes) {
