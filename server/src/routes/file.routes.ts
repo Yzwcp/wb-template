@@ -47,12 +47,16 @@ router.get("/:id", requirePermission("sys:file:list"), fileController.getById);
 // 删除文件
 router.post(
   "/:id/delete",
-  requirePermission("sys:file:remove"),
+  requirePermission("sys:file:delete"),
   fileController.remove,
 );
 
 // 移动文件到分组
-router.post("/move-to-group", requirePermission("sys:file:update"), fileController.moveToGroup);
+router.post(
+  "/move-to-group",
+  requirePermission("sys:file:update"),
+  fileController.moveToGroup,
+);
 
 // ===== 文件分组 =====
 router.get("/groups/list", fileController.getGroups);

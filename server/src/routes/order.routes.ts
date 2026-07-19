@@ -18,7 +18,6 @@ router.post("/mp/create", orderController.mpCreate);
 router.post("/mp/pay", orderController.mpPay);
 
 // ===== 管理后台接口（需管理员权限） =====
-router.get("/list", requirePermission("order:list"), orderController.getList);
 router.get("/", requirePermission("order:list"), orderController.getList);
 router.post("/query-sync", orderController.queryAndSync);
 router.post("/sync-refund", orderController.syncRefund);
