@@ -162,7 +162,6 @@ function handleAddButton() {
     status: 1,
   }
   isEditing.value = true
-  nextTick(() => formRef.value?.resetFields())
 }
 
 function handleAddRoot() {
@@ -181,7 +180,6 @@ function handleAddRoot() {
     status: 1,
   }
   isEditing.value = true
-  nextTick(() => formRef.value?.resetFields())
 }
 
 function handleAddChild() {
@@ -209,7 +207,6 @@ function handleAddChild() {
     status: 1,
   }
   isEditing.value = true
-  nextTick(() => formRef.value?.resetFields())
 }
 
 async function handleDelete() {
