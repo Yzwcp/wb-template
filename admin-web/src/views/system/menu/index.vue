@@ -24,7 +24,7 @@ const menuTypeOptions = [
 
 const parentTreeData = computed<TreeNode[]>(() => {
   const convert = (data: any[]): TreeNode[] => {
-    return (data || []).map((item: any) => ({
+    return (data || []).filter((item: any) => item.type !== 'F').map((item: any) => ({
       id: item.id,
       label: item.name,
       value: item.id,
@@ -85,6 +85,14 @@ async function loadTree() {
   }
 }
 
+// 菜单类型标签映射
+function getTypeTag(type: string) {
+  if (type === 'M') return { color: 'blue', label: '目录' };
+  if (type === 'C') return { color: 'green', label: '菜单' };
+  if (type === 'F') return { color: 'orange', label: '按钮' };
+  return { color: 'default', label: type };
+}
+
 function formatTreeData(data: any[]): any[] {
   return data.map((item) => ({
     key: item.id,
@@ -98,8 +106,9 @@ function formatTreeData(data: any[]): any[] {
     icon: item.icon,
     permission: item.permission,
     sort: item.sort,
-    visible: item.visible !== undefined ? item.visible : true,
-    status: item.status !== undefined ? item.status : 1,
+    // visible 来自后端是 number (1/0), 存到 tree node 时保留原始值供 form 使用
+    visible: item.visible,
+    status: item.status,
     children: item.children ? formatTreeData(item.children) : undefined,
   }))
 }
@@ -117,8 +126,9 @@ function handleTreeSelect(selectedKeys: any[], info: any) {
       icon: node.icon || '',
       permission: node.permission || '',
       sort: node.sort ?? 0,
-      visible: node.visible !== undefined ? node.visible : true,
-      status: node.status !== undefined ? node.status : 1,
+      // switch 组件需要 boolean，后端存的是 number(1/0)
+      visible: node.visible === 1 || node.visible === true,
+      status: node.status ?? 1,
     }
     isEditing.value = true
   }

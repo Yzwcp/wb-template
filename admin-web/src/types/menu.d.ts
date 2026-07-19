@@ -1,5 +1,7 @@
 /** 后端菜单项结构 */
 export interface MenuItem {
+  /** @deprecated use visible */
+  hidden?: never
   id: number
   parentId: number
   name: string
@@ -7,8 +9,8 @@ export interface MenuItem {
   component: string
   icon: string
   sort: number
-  hidden: boolean
-  type: 'menu' | 'button'
+  visible: number
+  type: 'M' | 'C' | 'F'
   permission: string
   children: MenuItem[]
 }
