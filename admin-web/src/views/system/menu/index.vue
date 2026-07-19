@@ -134,6 +134,34 @@ function handleTreeSelect(selectedKeys: any[], info: any) {
   }
 }
 
+
+function handleAddButton() {
+  if (!selectedMenu.value) {
+    message.warning('请先选择父菜单')
+    return
+  }
+  if (selectedMenu.value.type === 'F') {
+    message.warning('按钮类型不能添加子菜单')
+    return
+  }
+  const parentId = selectedMenu.value.id
+  selectedMenu.value = null
+  formModel.value = {
+    parentId,
+    name: '',
+    type: 'F',
+    path: '',
+    component: '',
+    icon: '',
+    permission: '',
+    sort: 0,
+    visible: true,
+    status: 1,
+  }
+  isEditing.value = true
+  nextTick(() => formRef.value?.resetFields())
+}
+
 function handleAddRoot() {
   selectedMenu.value = null
   formModel.value = {
@@ -161,8 +189,10 @@ function handleAddChild() {
     message.warning('按钮类型不能添加子菜单')
     return
   }
+  const parentId = selectedMenu.value.id
+  selectedMenu.value = null
   formModel.value = {
-    parentId: selectedMenu.value.id,
+    parentId,
     name: '',
     type: 'M',
     path: '',
